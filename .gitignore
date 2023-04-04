@@ -1,0 +1,11 @@
+# Exclude pycharm dependencies
+.idea/
+venv/
+__pycache__/
+
+# Exclude tmp folder
+tmp/
+
+# Exclude python build packages
+cv2geojson.egg-info/
+dist/

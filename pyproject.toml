@@ -1,0 +1,22 @@
+[project]
+name = "cv2geojson"
+version = "0.0.4"
+authors = [
+  { name="Mohsen Farzi", email="mhnfarzi@gmail.com" },
+]
+description = "Export contour annotations as geojson formatted data"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies=['opencv-python', 'numpy', 'geojson']
+keywords=['python', 'geojson', 'opencv', 'contours', 'polygons']
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/mfarzi/cv2geojson"
+"Bug Tracker" = "https://github.com/mfarzi/cv2geojson/issues"
