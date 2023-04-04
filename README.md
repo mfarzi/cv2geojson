@@ -17,7 +17,7 @@ import geojson
 import cv2geojson
 
 # read sample image
-img = cv.imread('example\\Desktop\\img_01.tiff')
+img = cv.imread('./example/img_01.png')
 img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
 # Extract annotation contours
@@ -29,6 +29,6 @@ features = [cv2geojson.geometry2feature(geometry) for geometry in geometries]
 annotation = geojson.FeatureCollection(features)
 
 # export annotation
-with open('example\\geocontours_01.geojson', 'w') as writer:
+with open('./example/geocontours_01.geojson', 'w') as writer:
     geojson.dump(annotation, writer)
 ```
