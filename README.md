@@ -3,8 +3,8 @@ cv2geojson is an open-source project to export annotation contours extracted usi
 
 ## Introduction
 In digital pathology, images are often quite large and dedicated software tools like [QuPath](https://qupath.github.io/) are required to aid visualisation. The python package cv2geojson export contours detected using `cv2.findContours` as polygons using GeoJSON format for visualisation in QuPath. For example, download the whole slide image with tissue sample ID _GTEX-12584-1526_ from [histology page](https://gtexportal.org/home/histologyPage). This image has 45,815x38,091 pixels which requires about 5GB of storage uncompressed. Rather than storing a binary mask for the foreground segmentation, the mask can be converted to polygons and stored as a geojson file. The image below shows a snapshot from the QuPath software. The foreground contour is blue.
-<figure style="margin:0; padding:0;">
-  <img src="https://github.com/mfarzi/cv2geojson/blob/main/example/GTEX-12584-1526-snapshot.png" alt="Image 1" style="width:30%; margin-right:10px;" />
+<figure>
+  <img src="https://github.com/mfarzi/cv2geojson/raw/main/example/GTEX-12584-1526-snapshot.png" alt="QuPath Snapshot 2" style="width:50%; margin-right:10px;" />
   <figcaption>Snapshot from QuPath software visualising foreground segmentation</figcaption>
 </figure>
 
@@ -31,7 +31,4 @@ features = [contour.export_feature(color=(0, 255, 0), label='roi') for contour i
 export_annotations(features, './example/img_01.geojson')
 ```
 
-<figure style="margin:0; padding:0;">
-  <img src="https://github.com/mfarzi/cv2geojson/blob/main/example/img_01_snapshot.png" alt="Image 1" style="width:30%; margin-right:10px;" />
-  <figcaption>Snapshot from QuPath software visualising foreground segmentation</figcaption>
-</figure>
+![QuPath Snapshot 2](https://github.com/mfarzi/cv2geojson/raw/main/example/img_01_snapshot.png)
