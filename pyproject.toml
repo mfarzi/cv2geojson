@@ -1,6 +1,6 @@
 [project]
 name = "cv2geojson"
-version = "0.0.4"
+version = "0.0.6"
 authors = [
   { name="Mohsen Farzi", email="mhnfarzi@gmail.com" },
 ]
@@ -14,7 +14,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Intended Audience :: Developers",
+    "Intended Audience :: Developers, Science/Research",
 ]
 
 [project.urls]
