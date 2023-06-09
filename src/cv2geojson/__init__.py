@@ -47,8 +47,7 @@ class GeoContour:
             raise ValueError("Either contour or geometry must be provided.")
 
     def __repr__(self):
-        geometry = self.export_geometry()
-        return f'{geometry}'
+        return 'cv2geojson.GeoContour.{}'.format(self.type)
 
     @staticmethod
     def _get_geometry_type(contours):
@@ -113,28 +112,22 @@ class GeoContour:
         feature = geojson.Feature(geometry=geometry, properties=properties)
         return feature
 
-    def scale_down(self, ratio=None, offset=None):
+    def scale_down(self, ratio=1, offset=(0, 0)):
         # return a new GeoContour instance with the coordinates being downsampled
-        if ratio is None:
-            ratio = 1
-        if offset is None:
-            offset = [0, 0]
         contours = []
         for contour in self.contours:
             contour = np.ndarray.astype(np.round((contour - offset) / ratio), dtype=np.int32)
             contours.append(contour)
+        # return scaled geocontour
         return GeoContour(contours=contours)
 
-    def scale_up(self, ratio=None, offset=None):
+    def scale_up(self, ratio=1, offset=(0, 0)):
         # return a new GeoContour instance with the coordinates being upsampled
-        if ratio is None:
-            ratio = 1
-        if offset is None:
-            offset = [0, 0]
         contours = []
         for contour in self.contours:
             contour = np.ndarray.astype(np.round((contour * ratio) + offset), dtype=np.int32)
             contours.append(contour)
+        # return scaled geocontour
         return GeoContour(contours=contours)
 
     def area(self, resolution=1):
@@ -181,9 +174,35 @@ class GeoContour:
             aspect_ratio = 0
         return aspect_ratio
 
+    def elongation(self):
+        moments = cv.moments(self.contours[0])
+        x = moments['mu20'] + moments['mu02']
+        y = np.sqrt(4 * moments['mu11']**2 + (moments['mu20'] - moments['mu02'])**2)
+        elongation = (x - y) / (x + y)
+        return elongation
+
     def holes_num(self):
         return len(self.contours) - 1
 
+    def fill_hole(self, resolution=1, hole_size=None):
+        # check if any holes exist
+        if self.holes_num() > 0:
+            if hole_size is None:
+                # Remove all holes
+                self.contours = [self.contours[0]]
+            elif hole_size > 0:
+                # all holes smaller than hole_size will be removed
+                contours = [self.contours[0]]
+                for hole in self.contours[1:]:
+                    hole_area = cv.contourArea(hole) * resolution * resolution
+                    if hole_area > hole_size:
+                        contours.append(hole)
+                # update the contours
+                self.contours = contours
+            # otherwise do nothing
+
+    def copy(self):
+        return GeoContour(contours=self.contours)
 
 def simplify(obj):
     """
@@ -211,7 +230,11 @@ def simplify(obj):
     if obj['type'] == 'GeometryCollection':
         geometries = []
         for geometry in obj['geometries']:
-            geometries.append(simplify(geometry))
+            g = simplify(geometry)
+            if type(g) == list:
+                geometries.extend(g)
+            else:
+                geometries.append(g)
         return geometries
 
     if obj['type'] == 'Feature':
@@ -220,7 +243,11 @@ def simplify(obj):
     if obj['type'] == 'FeatureCollection':
         geometries = []
         for feature in obj['features']:
-            geometries.append(simplify(feature['geometry']))
+            g = simplify(feature['geometry'])
+            if type(g) == list:
+                geometries.extend(g)
+            else:
+                geometries.append(g)
         return geometries
 
 
@@ -306,10 +333,10 @@ def draw_geocontours(mask, geocontours, mode='opencv'):
 
     if mode == 'imagej':
         mask2 = cv.resize(mask, dsize=(mask.shape[1]*2, mask.shape[0]*2), interpolation=cv.INTER_NEAREST)
-        geocontours2 = [geometry.scale_up(ratio=2, offset=[-1, -1]) for geometry in geocontours]
-        for geometry in geocontours2:
-            cv.drawContours(mask2, geometry.contours, -1, 255, -1)
-        mask = cv.resize(mask2, dsize=mask.shape, interpolation=cv.INTER_NEAREST)
+        for geometry in geocontours:
+            contours = [np.ndarray.astype(np.round(cnt * 2 - [1, 1]), dtype=np.int32) for cnt in geometry.contours]
+            cv.drawContours(mask2, contours, -1, 255, -1)
+        mask = cv.resize(mask2, dsize=(mask.shape[1], mask.shape[0]), interpolation=cv.INTER_NEAREST)
         return mask
 
 
