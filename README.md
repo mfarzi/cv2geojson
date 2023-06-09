@@ -1,6 +1,11 @@
 # cv2geojson
 cv2geojson is an open-source project to export annotation contours extracted using [OpenCV-python](https://github.com/opencv/opencv-python) package to [GeoJSON](https://pypi.org/project/geojson/) format.
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Examples](#examples)
+
 ## Introduction
 In digital pathology, images are often quite large and dedicated software tools like [QuPath](https://qupath.github.io/) are required to aid visualisation. The python package cv2geojson export contours detected using `cv2.findContours` as polygons using GeoJSON format for visualisation in QuPath. For example, download the whole slide image with tissue sample ID _GTEX-12584-1526_ from [histology page](https://gtexportal.org/home/histologyPage). This image has 45,815x38,091 pixels which requires about 5GB of storage uncompressed. Rather than storing a binary mask for the foreground segmentation, the mask can be converted to polygons and stored as a geojson file. The image below shows a snapshot from the QuPath software. The foreground contour is blue.
 <figure>
@@ -13,7 +18,7 @@ The recommended way to install is via pip:
 
 `pip install cv2geojson`
 
-## Example
+## Examples
 Here is a dummy example to demonstrate the utility of cv2geojson package.
 ```
 import cv2 as cv
