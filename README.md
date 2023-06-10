@@ -4,6 +4,12 @@ cv2geojson is an open-source project to export annotation contours extracted usi
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
+- [class GeoContour](#class-geocontour)
+  - [Attributes](#attributes)
+    - [contours](#contours)
+    - [type](#type)
+  - [Methods](#methods)
+    - [export_geometry](#--exportgeometryself)
 - [Examples](#examples)
 
 ## Introduction
@@ -17,6 +23,50 @@ In digital pathology, images are often quite large and dedicated software tools 
 The recommended way to install is via pip:
 
 `pip install cv2geojson`
+
+## class GeoContour
+The libarary implements a new class `cv2geojson.GeoContour` to accommodate bridging between contours extracted using `cv2.findContours` and geometries defined as geojson objects. To initialise a class instance, either contours or geojson objects can be provided. Below, an example for initialsing the class with both a geojson object and numpy contours are provided.
+```
+import numpy as np
+from geojson import LineString
+from cv2geojson import GeoContour
+
+# initialise GeoContour class with a geojson LineString object
+geometry = LineString([(1, 2), (5, 15)])
+geocontour_1 = GeoContour(geometry=geometry)
+
+# initialise GeoContour class with contours
+geocontour_2 = GeoContour(contours=[np.array([[1, 2], [5, 15]])]) 
+```
+
+### Attributes:
+
+#### <code>contours</code> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list of numpy.ndarray: the coordinates of the geometry
+
+#### <code>type</code>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str: Point, LineString, or Polygon
+
+
+### Methods:
+<a name="export-geometry"></a>
+#### - export_geometry(self)
+return the corrosponding geojson object
+#### export_feature(self, color=None, label=None, name=None)
+return a geojson.Feature object with provided properties
+- Parameters:
+  - color: {tuple: 3}: (r, g, b) in range 0 to 255
+  - label: {str}: the class name for the identified geometry
+  - name: {str}: the unique ID given to the identified geometry
+#### area(self, resolution=1)
+return the area of geometry
+- Parameters:
+  - resolution: {float}: the pixel size in micro-meter
+#### min_enclosing_circle(self)
+return the minimum circle that encloses the identified geometry
+- Return:
+  - center: {tuple: 2}: (x, y) coordinates 
+  - radius: {float}: radius in pixels
 
 ## Examples
 Here is a dummy example to demonstrate the utility of cv2geojson package.
