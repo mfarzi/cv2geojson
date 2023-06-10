@@ -9,7 +9,10 @@ cv2geojson is an open-source project to export annotation contours extracted usi
     - [contours](#contours)
     - [type](#type)
   - [Methods](#methods)
-    - [export_geometry](#--exportgeometryself)
+    - [export_geometry](#export_geometryself)
+    - [export_feature](#export_featureself-colornone-labelnone-namenone)
+    - [area](#areaself-resolution1.0)
+    - [min_enclosing_circle](#min_enclosing_circleself)
 - [Examples](#examples)
 
 ## Introduction
@@ -42,29 +45,32 @@ geocontour_2 = GeoContour(contours=[np.array([[1, 2], [5, 15]])])
 ### Attributes:
 
 #### <code>contours</code> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list of numpy.ndarray: the coordinates of the geometry
+list of numpy.ndarray: the coordinates of the geometry
 
 #### <code>type</code>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str: Point, LineString, or Polygon
-
+str: Point, LineString, or Polygon
 
 ### Methods:
-<a name="export-geometry"></a>
-#### - export_geometry(self)
-return the corrosponding geojson object
-#### export_feature(self, color=None, label=None, name=None)
-return a geojson.Feature object with provided properties
+#### <code>export_geometry(self)</code>
+- Returns
+  - geometry: {geojson.Point, geojson.LineString, geojson.Polgyon}
+
+#### <code>export_feature(self, color=None, label=None, name=None)</code>
 - Parameters:
   - color: {tuple: 3}: (r, g, b) in range 0 to 255
   - label: {str}: the class name for the identified geometry
   - name: {str}: the unique ID given to the identified geometry
-#### area(self, resolution=1)
-return the area of geometry
+- Returns: 
+  - feature: {geojson.Feature}: append provided properties to the geometry
+
+#### <code>area(self, resolution=1.0)</code>
 - Parameters:
   - resolution: {float}: the pixel size in micro-meter
-#### min_enclosing_circle(self)
-return the minimum circle that encloses the identified geometry
-- Return:
+- Returns:
+  - area: {float}: the total area of geometry in micro-meter-squared
+
+#### <code>min_enclosing_circle(self)</code>
+- Returns:
   - center: {tuple: 2}: (x, y) coordinates 
   - radius: {float}: radius in pixels
 
@@ -86,4 +92,6 @@ features = [contour.export_feature(color=(0, 255, 0), label='roi') for contour i
 export_annotations(features, './example/img_01.geojson')
 ```
 
-![QuPath Snapshot 2](https://github.com/mfarzi/cv2geojson/raw/main/example/img_01_snapshot.png)
+<figure>
+  <img src="https://github.com/mfarzi/cv2geojson/raw/main/example/img_01_snapshot.png" alt="QuPath Snapshot 2" style="width:70%; margin-right:10px;" />
+</figure>
