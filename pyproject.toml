@@ -1,6 +1,6 @@
 [project]
 name = "cv2geojson"
-version = "0.0.7"
+version = "0.0.9"
 authors = [
   { name="Mohsen Farzi", email="mhnfarzi@gmail.com" },
 ]
