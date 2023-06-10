@@ -130,7 +130,7 @@ class GeoContour:
         # return scaled geocontour
         return GeoContour(contours=contours)
 
-    def area(self, resolution=1):
+    def area(self, resolution=1.0):
         if self.type in ['Point', 'LineString']:
             return 0
         else:
