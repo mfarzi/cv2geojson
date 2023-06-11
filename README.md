@@ -19,8 +19,8 @@ cv2geojson is an open-source project to export annotation contours extracted usi
     - [elongation](#elongationself)
     - [holes_num](#holes_numself)
     - [fill_hole](#fill_holeself-resolution10-hole_size-10)
-    - [scale_up](#scale_upself-ratio1-offset00)
-    - [scale_down](#scale_downself-ratio1-offset00)
+    - [scale_up](#scale_upself-ratio1-offset0-0)
+    - [scale_down](#scale_downself-ratio1-offset0-0)
     - [copy](#copyself)
 - [Examples](#examples)
 
