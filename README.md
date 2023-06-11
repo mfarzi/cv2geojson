@@ -11,8 +11,17 @@ cv2geojson is an open-source project to export annotation contours extracted usi
   - [Methods](#methods)
     - [export_geometry](#export_geometryself)
     - [export_feature](#export_featureself-colornone-labelnone-namenone)
-    - [area](#areaself-resolution1.0)
+    - [area](#areaself-resolution10)
     - [min_enclosing_circle](#min_enclosing_circleself)
+    - [circularity](#circularityself)
+    - [solidity](#solidityself)
+    - [aspect_ratio](#aspect_ratioself)
+    - [elongation](#elongationself)
+    - [holes_num](#holes_numself)
+    - [fill_hole](#fill_holeself-resolution10-hole_size-10)
+    - [scale_up](#scale_upself-ratio1-offset00)
+    - [scale_down](#scale_downself-ratio1-offset00)
+    - [copy](#copyself)
 - [Examples](#examples)
 
 ## Introduction
@@ -28,7 +37,7 @@ The recommended way to install is via pip:
 `pip install cv2geojson`
 
 ## class GeoContour
-The libarary implements a new class `cv2geojson.GeoContour` to accommodate bridging between contours extracted using `cv2.findContours` and geometries defined as geojson objects. To initialise a class instance, either contours or geojson objects can be provided. Below, an example for initialsing the class with both a geojson object and numpy contours are provided.
+The library implements a new class, `cv2geojson.GeoContour`, which facilitates the seamless integration of contours extracted using `cv2.findContours` and geometries defined as GeoJSON objects. An instance of this class can be initialized by providing either contours or GeoJSON objects. Here is an example of how to initialize the class using both a GeoJSON object and NumPy contours:
 ```
 import numpy as np
 from geojson import LineString
@@ -45,34 +54,67 @@ geocontour_2 = GeoContour(contours=[np.array([[1, 2], [5, 15]])])
 ### Attributes:
 
 #### <code>contours</code> 
-list of numpy.ndarray: the coordinates of the geometry
+&nbsp;list of numpy.ndarray: the coordinates of the geometry
 
 #### <code>type</code>
-str: Point, LineString, or Polygon
+&nbsp;str: Point, LineString, or Polygon
 
 ### Methods:
 #### <code>export_geometry(self)</code>
-- Returns
-  - geometry: {geojson.Point, geojson.LineString, geojson.Polgyon}
+- Returns: {geojson.Point, geojson.LineString, geojson.Polgyon}
 
 #### <code>export_feature(self, color=None, label=None, name=None)</code>
 - Parameters:
   - color: {tuple: 3}: (r, g, b) in range 0 to 255
   - label: {str}: the class name for the identified geometry
   - name: {str}: the unique ID given to the identified geometry
-- Returns: 
-  - feature: {geojson.Feature}: append provided properties to the geometry
+- Returns: {geojson.Feature}: append provided properties to the geometry
 
 #### <code>area(self, resolution=1.0)</code>
 - Parameters:
   - resolution: {float}: the pixel size in micro-meter
-- Returns:
-  - area: {float}: the total area of geometry in micro-meter-squared
+- Returns: {float}: the total area of polygon in micro-meter-squared
 
 #### <code>min_enclosing_circle(self)</code>
 - Returns:
   - center: {tuple: 2}: (x, y) coordinates 
   - radius: {float}: radius in pixels
+
+#### <code>circularity(self)</code> 
+- Returns: {float}: $4\pi \text{Area}/\text{Perimeter}^2$
+
+#### <code>solidity(self)</code> 
+- Returns: {float}: the polygon area divided by its convex hull area
+
+#### <code>aspect_ratio(self)</code> 
+- Returns: {float}: the width of the enclosing rectangle divided by its height
+
+#### <code>elongation(self)</code> 
+- Returns: {float}: the minor to major diameter of the enclosing oval
+
+#### <code>holes_num(self)</code> 
+- Returns: {int}: the number of holes in the polygon
+
+#### <code>fill_hole(self, resolution=1.0, hole_size=-1.0)</code> 
+Remove any holes in the polygon larger than hole_size
+- Parameters:
+  - resolution: {float}: the pixel size in micro-meter
+  - hole_size: {float}: the hole area in micro-meter-squared. If -1, all holes will be filled.
+
+#### <code>scale_up(self, ratio=1, offset=(0, 0))</code>
+Scale up the coodinates: x_new = (ratio * x_old) + offset
+- Parameters:
+  - ratio: {int}
+  - offset: {tuple: 2}
+
+#### <code>scale_down(self, ratio=1, offset=(0, 0))</code>
+Scale down the coodinates: x_new = (x_old - offset) / ratio
+- Parameters:
+  - ratio: {int}
+  - offset: {tuple: 2}
+
+#### <code>copy(self)</code>
+- Returns: {cv2geojson.GeoContour}
 
 ## Examples
 Here is a dummy example to demonstrate the utility of cv2geojson package.
