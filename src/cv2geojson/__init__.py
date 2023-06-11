@@ -102,7 +102,7 @@ class GeoContour:
         properties = {'object_type': 'annotation'}
         classification = {}
         if color is not None:
-            classification['colorRGB'] = pack_rgb(color)
+            classification['colorRGB'] = _pack_rgb(color)
         if label is not None:
             classification['name'] = label
         if len(classification) > 0:
@@ -114,21 +114,13 @@ class GeoContour:
 
     def scale_down(self, ratio=1, offset=(0, 0)):
         # return a new GeoContour instance with the coordinates being downsampled
-        contours = []
-        for contour in self.contours:
-            contour = np.ndarray.astype(np.round((contour - offset) / ratio), dtype=np.int32)
-            contours.append(contour)
-        # return scaled geocontour
-        return GeoContour(contours=contours)
+        contours = [np.ndarray.astype(np.round((cnt - offset) / ratio), dtype=np.int32) for cnt in self.contours]
+        self.contours = contours
 
     def scale_up(self, ratio=1, offset=(0, 0)):
         # return a new GeoContour instance with the coordinates being upsampled
-        contours = []
-        for contour in self.contours:
-            contour = np.ndarray.astype(np.round((contour * ratio) + offset), dtype=np.int32)
-            contours.append(contour)
-        # return scaled geocontour
-        return GeoContour(contours=contours)
+        contours = [np.ndarray.astype(np.round(cnt * ratio + offset), dtype=np.int32) for cnt in self.contours]
+        self.contours = contours
 
     def area(self, resolution=1.0):
         if self.type in ['Point', 'LineString']:
@@ -184,10 +176,10 @@ class GeoContour:
     def holes_num(self):
         return len(self.contours) - 1
 
-    def fill_hole(self, resolution=1, hole_size=None):
+    def fill_hole(self, resolution=1.0, hole_size=-1.0):
         # check if any holes exist
         if self.holes_num() > 0:
-            if hole_size is None:
+            if hole_size < 0:
                 # Remove all holes
                 self.contours = [self.contours[0]]
             elif hole_size > 0:
@@ -203,6 +195,10 @@ class GeoContour:
 
     def copy(self):
         return GeoContour(contours=self.contours)
+
+    def get_contours(self, scale=1, offset=(0, 0)):
+        return [np.ndarray.astype(np.round((cnt - offset) / scale), dtype=np.int32) for cnt in self.contours]
+
 
 def simplify(obj):
     """
@@ -269,11 +265,11 @@ def contour_to_geocontour(contours, hierarchy):
     return geocontours
 
 
-def load_annotations(path_to_file):
+def load_annotations(path_to_geojson):
     """
     return a list of geocontours from a geojson file
     """
-    with open(path_to_file, 'r') as reader:
+    with open(path_to_geojson, 'r') as reader:
         annotations = geojson.load(reader)
 
     geometries = simplify(annotations)
@@ -281,7 +277,7 @@ def load_annotations(path_to_file):
     return geocontours
 
 
-def export_annotations(features, path_to_file):
+def export_annotations(features, path_to_geojson):
     """
     Export features formatted by geojson python package
     :param features: a list of 'geojson.Feature' objects
@@ -292,7 +288,7 @@ def export_annotations(features, path_to_file):
         assert feature.is_valid, f'Input feature is not valid: {feature.errors()}.'
 
     annotations = geojson.FeatureCollection(features=features)
-    with open(path_to_file, 'w') as writer:
+    with open(path_to_geojson, 'w') as writer:
         geojson.dump(annotations, writer)
 
 
@@ -320,7 +316,7 @@ def find_geocontours(mask, mode='opencv'):
     return geocontours
 
 
-def draw_geocontours(mask, geocontours, mode='opencv'):
+def draw_geocontours(mask, geocontours, scale=1, offset=(0, 0), mode='opencv'):
     """
     Draw geocontours into the mask and return a new binary mask
     """
@@ -328,25 +324,25 @@ def draw_geocontours(mask, geocontours, mode='opencv'):
 
     if mode == 'opencv':
         for geometry in geocontours:
-            cv.drawContours(mask, geometry.contours, -1, 255, -1)
-        return mask
+            cv.drawContours(mask, geometry.get_contours(scale=scale, offset=offset), -1, 255, -1)
 
     if mode == 'imagej':
         mask2 = cv.resize(mask, dsize=(mask.shape[1]*2, mask.shape[0]*2), interpolation=cv.INTER_NEAREST)
         for geometry in geocontours:
-            contours = [np.ndarray.astype(np.round(cnt * 2 - [1, 1]), dtype=np.int32) for cnt in geometry.contours]
+            contours = geometry.get_contours(scale=scale, offset=offset)
+            contours = [np.ndarray.astype(np.round(cnt * 2 - [1, 1]), dtype=np.int32) for cnt in contours]
             cv.drawContours(mask2, contours, -1, 255, -1)
-        mask = cv.resize(mask2, dsize=(mask.shape[1], mask.shape[0]), interpolation=cv.INTER_NEAREST)
-        return mask
+        mask1 = cv.resize(mask2, dsize=(mask.shape[1], mask.shape[0]), interpolation=cv.INTER_NEAREST)
+        mask[mask1 == 255] = 255
 
 
-def pack_rgb(color):
+def _pack_rgb(color):
     r, g, b = color
     value = (0xff << 24) + ((r & 0xff) << 16) + ((g & 0xff) << 8) + (b & 0xff)
     return value - 4294967296
 
 
-def get_rgb(value):
+def _get_rgb(value):
     value += 4294967296
     value -= (0xff << 24)
     b = value % 256
